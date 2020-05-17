@@ -7,14 +7,18 @@ import androidx.preference.PreferenceManager;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -25,6 +29,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,12 +40,14 @@ public class MainActivity extends AppCompatActivity {
     private String path = Environment.getExternalStorageDirectory().toString() + "/files/";
     private Cursor c = null;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         editText = (EditText)findViewById(R.id.editText);
+
 
     }
 
@@ -56,48 +65,40 @@ public class MainActivity extends AppCompatActivity {
                 editText.setText("");
                 return true;
             case R.id.action_open:
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Имя файла");
-                builder.setMessage("Введите название файла");
-                final EditText input = new EditText(this);
-                builder.setView(input);
-                builder.setPositiveButton("Открыть", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        editText.setText("");
-                        String value = input.getText().toString();
-                        filename = value;
-                        File file = new File(path + filename);
-                        if(file.exists() && file.isFile()){
-                            editText.setText(openFile(filename));
-                        } else {
-                            Toast.makeText(MainActivity.this, "ФАЙЛА НЕ СУЩЕСТВУЕТ", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-                builder.show();
+
                 return true;
             case R.id.action_save:
-                AlertDialog.Builder  alert = new AlertDialog.Builder(this);
-                alert.setTitle("Имя файла");
-                alert.setMessage("Введите имя файла для сохранения");
-                final EditText input2 = new EditText(this);
-                alert.setView(input2);
-                alert.setPositiveButton("Сохранить", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                            String value = input2.getText().toString();
-                            filename = value;
-                            saveFile(filename, editText.getText().toString());
-                    }
-                });
-                alert.setNegativeButton("Отменить", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+//                AlertDialog.Builder  alert = new AlertDialog.Builder(this);
+//                alert.setTitle("Имя файла");
+//                alert.setMessage("Введите имя файла для сохранения");
+//                final EditText input2 = new EditText(this);
+//                alert.setView(input2);
+//                alert.setPositiveButton("Сохранить", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                            String value = input2.getText().toString();
+//                            filename = value;
+//                            saveFile(filename, editText.getText().toString());
+//                    }
+//                });
+//                alert.setNegativeButton("Отменить", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//
+//                    }
+//                });
+//                alert.show();
 
-                    }
-                });
-                alert.show();
+                String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                SQLiteDatabase db = getBaseContext().openOrCreateDatabase("notes.db", MODE_PRIVATE, null);
+                db.execSQL("CREATE TABLE IF NOT EXISTS note (body TEXT, date TEXT)");
+              //  Cursor query = db.rawQuery("SELECT * FROM note;", null);
+                EditText body = (EditText)findViewById(R.id.editText);
+                String text = body.getText().toString();
+                db.execSQL("INSERT INTO note VALUES ('" + text + "'," + date + ");");
+                Log.d("","");
                 return true;
             case R.id.action_settings:
                 Intent i = new Intent(MainActivity.this, SettingActivity.class);
