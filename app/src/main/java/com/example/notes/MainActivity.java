@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
                 name = (EditText)findViewById(R.id.editText);
                 body = (EditText)findViewById(R.id.editTextBody);
-
+                String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
 
                 return true;
             case R.id.action_settings:
