@@ -37,7 +37,7 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
-    public EditText editText;
+    public EditText name, body;
     public String filename = null;
     private String path = Environment.getExternalStorageDirectory().toString() + "/files/";
     private DatabaseHelper mDbHelper;
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        editText = (EditText)findViewById(R.id.editText);
+
 
 
     }
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_clear:
-                editText.setText("");
+                body.setText("");
                 return true;
             case R.id.action_open:
 
@@ -81,34 +81,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             case R.id.action_save:
-//                AlertDialog.Builder  alert = new AlertDialog.Builder(this);
-//                alert.setTitle("Имя файла");
-//                alert.setMessage("Введите имя файла для сохранения");
-//                final EditText input2 = new EditText(this);
-//                alert.setView(input2);
-//                alert.setPositiveButton("Сохранить", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                            String value = input2.getText().toString();
-//                            filename = value;
-//                            saveFile(filename, editText.getText().toString());
-//                    }
-//                });
-//                alert.setNegativeButton("Отменить", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//
-//                    }
-//                });
-//                alert.show();
 
-                String todayAsString = new SimpleDateFormat("yyyyMMdd").format(new Date());
-                SQLiteDatabase db = getBaseContext().openOrCreateDatabase("notes.db", MODE_PRIVATE, null);
-                db.execSQL("CREATE TABLE IF NOT EXISTS note (_id integer primary key autoincrement, body TEXT, date TEXT)");
-              //  Cursor query = db.rawQuery("SELECT * FROM note;", null);
-                EditText body = (EditText)findViewById(R.id.editText);
-                String text = body.getText().toString();
-                db.execSQL("INSERT INTO note VALUES ('" + text + "'," + todayAsString + ");");
+                name = (EditText)findViewById(R.id.editText);
+                body = (EditText)findViewById(R.id.editTextBody);
+
+
                 return true;
             case R.id.action_settings:
                 Intent i = new Intent(MainActivity.this, SettingActivity.class);
@@ -123,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         float fSize = Float.parseFloat(sharedPreferences.getString("Размер", "20"));
-        editText.setTextSize(fSize);
+        body.setTextSize(fSize);
 
         String regular = sharedPreferences.getString("Стиль", "");
         int typeface = Typeface.NORMAL;
@@ -133,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         if(regular.contains("Курсив"))
             typeface += Typeface.ITALIC;
 
-        editText.setTypeface(null, typeface);
+        body.setTypeface(null, typeface);
 
         int color = Color.BLACK;
 
@@ -146,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         if(sharedPreferences.getBoolean(getString(R.string.pref_color_yellow), false))
             color += Color.YELLOW;
 
-        editText.setTextColor(color);
+        body.setTextColor(color);
     }
 
     private void saveFile(String filename, String body){
