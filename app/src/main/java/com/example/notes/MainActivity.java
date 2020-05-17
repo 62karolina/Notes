@@ -18,6 +18,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +32,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,8 +40,17 @@ public class MainActivity extends AppCompatActivity {
     public EditText editText;
     public String filename = null;
     private String path = Environment.getExternalStorageDirectory().toString() + "/files/";
+    private DatabaseHelper mDbHelper;
     private Cursor c = null;
 
+    public static final class NewNote implements BaseColumns {
+        public final static String TABLE_NAME = "note";
+
+        public final static String _ID = BaseColumns._ID;
+        public final static String COLUMN_NAME = "name";
+        public final static String COLUMN_body = "body";
+        public final static String COLUMN_DATE = "date";
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_open:
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
+                Intent intent = new Intent(MainActivity.this, ListActivity.class);
+                startActivity(intent);
                 return true;
             case R.id.action_save:
 //                AlertDialog.Builder  alert = new AlertDialog.Builder(this);
@@ -91,14 +102,13 @@ public class MainActivity extends AppCompatActivity {
 //                });
 //                alert.show();
 
-                String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                String todayAsString = new SimpleDateFormat("yyyyMMdd").format(new Date());
                 SQLiteDatabase db = getBaseContext().openOrCreateDatabase("notes.db", MODE_PRIVATE, null);
-                db.execSQL("CREATE TABLE IF NOT EXISTS note (body TEXT, date TEXT)");
+                db.execSQL("CREATE TABLE IF NOT EXISTS note (_id integer primary key autoincrement, body TEXT, date TEXT)");
               //  Cursor query = db.rawQuery("SELECT * FROM note;", null);
                 EditText body = (EditText)findViewById(R.id.editText);
                 String text = body.getText().toString();
-                db.execSQL("INSERT INTO note VALUES ('" + text + "'," + date + ");");
-                Log.d("","");
+                db.execSQL("INSERT INTO note VALUES ('" + text + "'," + todayAsString + ");");
                 return true;
             case R.id.action_settings:
                 Intent i = new Intent(MainActivity.this, SettingActivity.class);

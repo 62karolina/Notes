@@ -12,8 +12,15 @@
     <EditText
         android:id="@+id/editText"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:gravity="start"
+        android:hint="Название..."
         android:inputType="textMultiLine" />
-
+    <EditText
+        android:id="@+id/editText1"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:gravity="start"
+        android:hint="Основной текст"
+        android:inputType="textMultiLine" />
 </LinearLayout>
