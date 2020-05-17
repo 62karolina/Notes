@@ -22,6 +22,7 @@ import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -37,11 +38,13 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
-    public EditText name, body;
+    public EditText editText, editText1;
     public String filename = null;
     private String path = Environment.getExternalStorageDirectory().toString() + "/files/";
     private DatabaseHelper mDbHelper;
-    private Cursor c = null;
+    SQLiteDatabase db;
+     Cursor cursor;
+    private long noteId = 0;
 
     public static final class NewNote implements BaseColumns {
         public final static String TABLE_NAME = "note";
@@ -56,10 +59,27 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        editText = (EditText)findViewById(R.id.editText);
+        editText1 = (EditText)findViewById(R.id.editTextBody);
 
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            noteId = extras.getLong("id");
+        }
+        mDbHelper = new DatabaseHelper(this);
+        db = mDbHelper.getWritableDatabase();
+        // если 0, то добавление
+        if (noteId > 0) {
+            // получаем элемент по id из бд
+            cursor = db.rawQuery("select * from note where " +
+                    NewNote._ID + "=?", new String[]{String.valueOf(noteId)});
+            cursor.moveToFirst();
+            editText.setText(cursor.getString(1));
+            editText1.setText(cursor.getString(2));
+            cursor.close();
+        } else {
 
-
-
+        }
     }
 
     @Override
@@ -73,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_clear:
-                body.setText("");
+                editText1.setText("");
                 return true;
             case R.id.action_open:
 
@@ -82,10 +102,19 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_save:
 
-                name = (EditText)findViewById(R.id.editText);
-                body = (EditText)findViewById(R.id.editTextBody);
+                String name = editText.getText().toString().trim();
+                String body = editText1.getText().toString().trim();
                 String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
 
+                ContentValues cv = new ContentValues();
+                cv.put(NewNote.COLUMN_NAME, name);
+                cv.put(NewNote.COLUMN_body, body);
+
+                if (noteId > 0) {
+                    db.update("note", cv, NewNote._ID + "=" + String.valueOf(noteId), null);
+                } else {
+                    db.insert("note", null, cv);
+                }
                 return true;
             case R.id.action_settings:
                 Intent i = new Intent(MainActivity.this, SettingActivity.class);
@@ -100,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         float fSize = Float.parseFloat(sharedPreferences.getString("Размер", "20"));
-        body.setTextSize(fSize);
+        editText1.setTextSize(fSize);
 
         String regular = sharedPreferences.getString("Стиль", "");
         int typeface = Typeface.NORMAL;
@@ -110,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
         if(regular.contains("Курсив"))
             typeface += Typeface.ITALIC;
 
-        body.setTypeface(null, typeface);
+        editText1.setTypeface(null, typeface);
 
         int color = Color.BLACK;
 
@@ -123,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         if(sharedPreferences.getBoolean(getString(R.string.pref_color_yellow), false))
             color += Color.YELLOW;
 
-        body.setTextColor(color);
+        editText1.setTextColor(color);
     }
 
     private void saveFile(String filename, String body){
