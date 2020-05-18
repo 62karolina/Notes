@@ -93,7 +93,11 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_clear:
-                editText1.setText("");
+                db.delete(NewNote.TABLE_NAME, "_id = ?", new String[]{String.valueOf(noteId)});
+                db.close();
+                Intent intent1 = new Intent(this, ListActivity.class);
+                intent1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent1);
                 return true;
             case R.id.action_open:
 
@@ -109,12 +113,16 @@ public class MainActivity extends AppCompatActivity {
                 ContentValues cv = new ContentValues();
                 cv.put(NewNote.COLUMN_NAME, name);
                 cv.put(NewNote.COLUMN_body, body);
+                cv.put(NewNote.COLUMN_DATE, date);
 
                 if (noteId > 0) {
                     db.update("note", cv, NewNote._ID + "=" + String.valueOf(noteId), null);
                 } else {
                     db.insert("note", null, cv);
                 }
+                Toast.makeText(getApplicationContext(), "Сохранено", Toast.LENGTH_SHORT).show();
+
+
                 return true;
             case R.id.action_settings:
                 Intent i = new Intent(MainActivity.this, SettingActivity.class);
@@ -155,35 +163,4 @@ public class MainActivity extends AppCompatActivity {
         editText1.setTextColor(color);
     }
 
-    private void saveFile(String filename, String body){
-        try {
-            File root = new File(this.path);
-            if(!root.exists()){
-                root.mkdirs();
-            }
-            File file = new File(root, filename);
-            FileWriter writer = new FileWriter(file);
-            writer.append(body);
-            writer.flush();
-            writer.close();
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    private String openFile(String fileName){
-        StringBuilder  text = new StringBuilder();
-        try {
-            File file = new File(this.path, fileName);
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-            while((line = br.readLine()) != null){
-                text.append(line + "\n");
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return text.toString();
-    }
 }
